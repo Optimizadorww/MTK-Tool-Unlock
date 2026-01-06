@@ -7,46 +7,44 @@ NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      MTK UNLOCK PRO - SOLUCIÓN REAL"
+echo -e "      MTK UNLOCK PRO - MODO NO-ROOT"
 echo -e "==========================================${NC}"
 
-# 1. Limpieza absoluta de intentos fallidos
-rm -rf $HOME/mtkclient
-rm -f $PREFIX/bin/MtkUnlock
-
-# 2. Instalación de lo que sí funciona (Base)
-echo -e "\n${CYAN}[1/3] Instalando dependencias de sistema...${NC}"
+# 1. Instalación de paquetes básicos permitidos
+echo -e "\n${CYAN}[1/2] Preparando entorno...${NC}"
 pkg update -y
 pkg install python git libusb clang binutils -y
 
-# 3. Descarga Directa (Bypass de PIP)
-echo -e "\n${CYAN}[2/3] Descargando motor de desbloqueo...${NC}"
-cd $HOME
-git clone --depth 1 https://github.com/bkerler/mtkclient.git
-
-# Instalación manual de librerías para evitar el error de Termux
+# 2. Instalación de librerías saltando el bloqueo de PIP (Foto 1000053736)
+# Usamos el flag obligatorio para Android sin Root
+echo -e "\n${CYAN}[2/2] Instalando librerías USB...${NC}"
 pip install pyusb pyserial --break-system-packages
 
-# 4. Creación del comando con RUTA FIJA
-echo -e "\n${CYAN}[3/3] Configurando comando 'MtkUnlock'...${NC}"
+# 3. Descarga directa en el HOME del usuario (Sin Root)
+cd $HOME
+rm -rf mtkclient
+echo -e "\n${CYAN}[+] Descargando archivos necesarios...${NC}"
+git clone --depth 1 https://github.com/bkerler/mtkclient.git
 
+# 4. Crear el comando ejecutable
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
 clear
 echo -e "\033[1;32m=========================================="
-echo -e "      MTK BOOTLOADER UNLOCKER 2026"
+echo -e "      MTK BOOTLOADER UNLOCKER (SIN ROOT)"
 echo -e "==========================================\033[0m"
-echo -e "1. Apaga el celular por completo."
-echo -e "2. Conecta presionando Vol+ y Vol-."
+echo -e "1. Apaga el celular."
+echo -e "2. Conecta con Vol+ y Vol- presionados."
 echo -e "------------------------------------------"
 
-# Forzamos la ejecución desde la carpeta que acabamos de clonar
-cd $HOME/mtkclient && python3 mtk oem unlock
+# Ruta local garantizada
+cd $HOME/mtkclient
+python3 mtk oem unlock
 EOF
 
 chmod +x $PREFIX/bin/MtkUnlock
 
 echo -e "\n${VERDE}=========================================="
-echo -e "        ¡INSTALACIÓN COMPLETADA!"
+echo -e "        INSTALACIÓN TERMINADA"
 echo -e "   Escribe 'MtkUnlock' para iniciar"
 echo -e "==========================================${NC}"
