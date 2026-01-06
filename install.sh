@@ -7,20 +7,20 @@ NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      INSTALANDO MTK UNLOCK PRO v2.5"
+echo -e "      INSTALANDO MTK UNLOCK PRO v2.6"
 echo -e "==========================================${NC}"
 
-# 1. Actualización e instalación de Python (Arregla el error de 'pip')
+# 1. Instalación de Python y dependencias de sistema
 echo -e "\n${CYAN}[1/3] Instalando Python y dependencias...${NC}"
 pkg update -y
 pkg install python libusb clang binutils make -y
 
-# 2. Instalación de librerías
+# 2. Instalación de la librería correcta (mtkclient)
 echo -e "\n${CYAN}[2/3] Instalando librerías de desbloqueo...${NC}"
 pip install --upgrade pip
-pip install pyusb pyserial mtk
+pip install pyusb pyserial mtkclient  # <--- Aquí estaba el error, es mtkclient
 
-# 3. Creación de la interfaz (Corregido el error de EOF)
+# 3. Creación de la interfaz con los comandos de mtkclient
 echo -e "\n${CYAN}[3/3] Creando acceso directo 'MtkUnlock'...${NC}"
 
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
@@ -48,10 +48,11 @@ while true; do
     case $opt in
         1)
             echo -e "\nApaga el cel, presiona Vol+ y Vol- y conecta el USB..."
-            python3 -m mtk da xml bootloader unlock
+            # Comando correcto para mtkclient
+            mtk oem unlock
             read -p "Presiona Enter para volver..." ;;
         2)
-            python3 -m mtk da xml bootloader lock
+            mtk oem lock
             read -p "Presiona Enter para volver..." ;;
         3) exit 0 ;;
         *) echo -e "Opción no válida"; sleep 1 ;;
@@ -59,7 +60,6 @@ while true; do
 done
 EOF
 
-# Dar permisos
 chmod +x $PREFIX/bin/MtkUnlock
 
 echo -e "\n${VERDE}=========================================="
