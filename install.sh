@@ -1,57 +1,36 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Colores
-VERDE='\033[1;32m'
-CYAN='\033[1;36m'
-ROJO='\033[1;31m'
-NC='\033[0m'
-
-clear
-echo -e "${VERDE}=========================================="
-echo -e "      MTK UNLOCK PRO - MODO MANUAL"
-echo -e "==========================================${NC}"
-
-# 1. Limpieza total de intentos fallidos
+# Limpieza radical
 rm -rf $HOME/mtkclient
 rm -f $PREFIX/bin/MtkUnlock
 
-# 2. Instalación de paquetes base (Lo que sí funcionó en tus fotos)
-echo -e "\n${CYAN}[1/3] Preparando sistema...${NC}"
+# 1. Instalación de paquetes (Lo único que te ha funcionado bien)
 pkg update -y
 pkg install python git libusb clang binutils -y
 
-# 3. Descarga Manual (Esto evita el error de PIP de tus capturas)
-echo -e "\n${CYAN}[2/3] Descargando motor de desbloqueo...${NC}"
+# 2. Descarga forzada del motor
 cd $HOME
-# Forzamos la descarga del repositorio completo
 git clone --depth 1 https://github.com/bkerler/mtkclient.git
 
-# 4. Instalación de librerías USB
-echo -e "\n${CYAN}[3/3] Instalando librerías críticas...${NC}"
-# Usamos el flag que pide Termux en tus fotos
+# 3. Instalación de librerías con el flag que tu Termux exige (Foto 1000053736)
 pip install pyusb pyserial --break-system-packages
 
-# 5. Configurar el acceso directo con RUTA ABSOLUTA
+# 4. Crear el comando 'MtkUnlock' con Bypass de Ruta
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
-clear
-echo -e "\033[1;32m=========================================="
-echo -e "      XIAOMI/MTK BOOTLOADER UNLOCKER"
-echo -e "==========================================\033[0m"
+echo -e "\033[1;32mIniciando MTK Unlock...\033[0m"
 
-# Entramos a la carpeta para que NO salga "No such file"
-if [ -d "$HOME/mtkclient" ]; then
-    cd $HOME/mtkclient
-    # Ejecutamos el archivo directamente con Python3
-    python3 mtk oem unlock
-else
-    echo -e "\033[1;31mERROR: La carpeta no existe. Reintenta la instalación.\033[0m"
-fi
+# FORZAMOS LA RUTA REAL
+cd /data/data/com.termux/files/home/mtkclient
+
+# Ejecutamos llamando al intérprete directamente para que no diga "No such file"
+python3 /data/data/com.termux/files/home/mtkclient/mtk oem unlock
 EOF
 
 chmod +x $PREFIX/bin/MtkUnlock
 
-echo -e "\n${VERDE}=========================================="
-echo -e "        ¡POR FIN INSTALADO!"
+clear
+echo -e "=========================================="
+echo -e "      ¡INSTALACIÓN COMPLETADA!"
 echo -e "   Escribe 'MtkUnlock' para iniciar"
-echo -e "==========================================${NC}"
+echo -e "=========================================="
