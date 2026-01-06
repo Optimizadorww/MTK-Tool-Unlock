@@ -7,52 +7,43 @@ NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      MTK UNLOCK PRO - FIX SIN-ROOT"
+echo -e "      MTK UNLOCK PRO - MODO SISTEMA"
 echo -e "==========================================${NC}"
 
-# 1. Limpieza total de lo que no sirve (Tus fotos 1000053741/43)
+# 1. Limpieza absoluta
 rm -rf $HOME/mtkclient
 rm -f $PREFIX/bin/MtkUnlock
 
-# 2. Instalación de paquetes base
-echo -e "\n${CYAN}[1/2] Instalando paquetes...${NC}"
+# 2. Instalación de dependencias (Sin los paquetes que te dan error)
+echo -e "\n${CYAN}[1/2] Instalando dependencias base...${NC}"
 pkg update -y
-pkg install python git libusb clang binutils wget -y
+pkg install python libusb clang binutils -y
 
-# 3. Descarga Manual y Forzada
-echo -e "\n${CYAN}[2/2] Descargando motor de desbloqueo...${NC}"
-cd $HOME
-# Descargamos el motor directamente sin pedir permiso a git si falla
-git clone --depth 1 https://github.com/bkerler/mtkclient.git || (wget https://github.com/bkerler/mtkclient/archive/refs/heads/main.zip && unzip main.zip && mv mtkclient-main mtkclient)
+# 3. Instalación como comando de sistema (Esto evita el "No such file")
+echo -e "\n${CYAN}[2/2] Instalando motor globalmente...${NC}"
+# Usamos el flag que te pide Termux en tus capturas
+pip install mtkclient --break-system-packages
 
-# Instalamos las librerías con el flag que te pide tu Termux (Foto 1000053736)
-pip install pyusb pyserial --break-system-packages
-
-# 4. Crear acceso directo con RUTA ABSOLUTA FORZADA
+# 4. Crear acceso directo que llama al comando directo
 echo -e "\n${CYAN}[+] Configurando acceso directo...${NC}"
 
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
 clear
 echo -e "\033[1;32m=========================================="
-echo -e "      MTK UNLOCKER - MODO SEGURO"
+echo -e "      MTK BOOTLOADER UNLOCKER 2026"
 echo -e "==========================================\033[0m"
-echo -e "1. Apaga el cel."
-echo -e "2. Mantén Vol+ y Vol-."
-echo -e "3. Conecta el USB."
+echo -e "1. Apaga el celular por completo."
+echo -e "2. Conecta con Vol+ y Vol- presionados."
 echo -e "------------------------------------------"
 
-# Intentamos ejecutar el archivo físico directamente para evitar el "No such file"
-if [ -d "$HOME/mtkclient" ]; then
-    python3 $HOME/mtkclient/mtk oem unlock
-else
-    echo -e "\033[1;31mERROR: La carpeta no existe. Reintenta la instalación.\033[0m"
-fi
+# Ya no usamos rutas de carpetas, usamos el comando directo del sistema
+mtk oem unlock
 EOF
 
 chmod +x $PREFIX/bin/MtkUnlock
 
 echo -e "\n${VERDE}=========================================="
-echo -e "        LISTO - SIN ERRORES"
+echo -e "        ¡POR FIN INSTALADO!"
 echo -e "   Escribe 'MtkUnlock' para iniciar"
 echo -e "==========================================${NC}"
