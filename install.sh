@@ -3,61 +3,49 @@
 # Colores
 VERDE='\033[1;32m'
 CYAN='\033[1;36m'
-ROJO='\033[1;31m'
 NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      XIAOMI MTK UNLOCK PRO v8.0"
+echo -e "      MTK UNLOCK PRO v9.0 - FORZADO"
 echo -e "==========================================${NC}"
 
-# 1. Forzar instalación de Python y Pip limpio
-echo -e "\n${CYAN}[1/2] Instalando dependencias críticas...${NC}"
+# 1. Instalación de lo básico (Sin libcrypt-dev)
+echo -e "\n${CYAN}[1/2] Preparando entorno de sistema...${NC}"
 pkg update -y
-pkg install python python-pip libusb git clang -y
+pkg install python libusb git clang binutils -y
 
-# 2. Instalar mtkclient de forma global (Saltando el bloqueo de Termux)
-echo -e "\n${CYAN}[2/2] Instalando motor de desbloqueo...${NC}"
-# Usamos el flag oficial para permitir la instalación en sistemas protegidos
-pip install mtkclient --break-system-packages
+# 2. Descarga forzada del motor (Ignorando errores de PIP)
+echo -e "\n${CYAN}[2/2] Descargando motor de desbloqueo...${NC}"
+cd $HOME
+rm -rf mtkclient
+git clone --depth 1 https://github.com/bkerler/mtkclient.git
+cd mtkclient
+# Instalamos solo las dependencias mínimas para que no de error de bloqueado
+pip install pyusb pyserial --break-system-packages
 
-# 3. Crear el acceso directo que usa el comando GLOBAL
-echo -e "\n${CYAN}[+] Configurando interfaz...${NC}"
+# 3. Crear el acceso directo con RUTA ABSOLUTA AUTOMÁTICA
+echo -e "\n${CYAN}[+] Configurando comando 'MtkUnlock'...${NC}"
 
-cat << 'EOF' > $PREFIX/bin/MtkUnlock
+# Buscamos donde quedó mtk para que no te salga "No such file"
+cat << EOF > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
-VERDE='\033[1;32m'
-CYAN='\033[1;36m'
-NC='\033[0m'
+clear
+echo -e "\033[1;32m=========================================="
+echo -e "      XIAOMI/MTK BOOTLOADER UNLOCKER"
+echo -e "==========================================\033[0m"
+echo -e "1. Apaga el celular por completo."
+echo -e "2. Mantén Vol+ y Vol- conectados."
+echo -e "3. Conecta el cable USB ahora."
+echo -e "------------------------------------------"
 
-while true; do
-    clear
-    echo -e "${VERDE}=============================================================="
-    echo -e "            UNLOCKED MTK - MODO BINARIO DIRECTO"
-    echo -e "==============================================================${NC}"
-    echo -e " 1) DESBLOQUEAR BOOTLOADER (Unlock)"
-    echo -e " 2) BLOQUEAR BOOTLOADER (Lock)"
-    echo -e " 3) SALIR"
-    echo ""
-    read -p " SELECCIONA: " opt
-    case $opt in
-        1)
-            echo -e "\n[!] Conecta el cel apagado (Vol+ y Vol-)..."
-            # Aquí ya no usamos rutas raras, usamos el comando directo del sistema
-            mtk oem unlock
-            echo -e "\nPresiona Enter para volver..."; read ;;
-        2)
-            mtk oem lock
-            echo -e "\nPresiona Enter para volver..."; read ;;
-        3) exit 0 ;;
-        *) echo -e "Opción no válida"; sleep 1 ;;
-    esac
-done
+# Ejecución forzada desde la carpeta de usuario
+python3 \$HOME/mtkclient/mtk oem unlock
 EOF
 
 chmod +x $PREFIX/bin/MtkUnlock
 
 echo -e "\n${VERDE}=========================================="
-echo -e "        ¡POR FIN INSTALADO!"
-echo -e "   Escribe 'MtkUnlock' para iniciar"
+echo -e "        ¡INSTALACIÓN FORZADA LISTA!"
+echo -e "   Escribe 'MtkUnlock' para empezar"
 echo -e "==========================================${NC}"
