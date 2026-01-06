@@ -7,20 +7,20 @@ NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      INSTALANDO MTK UNLOCK PRO v2.6"
+echo -e "      INSTALANDO MTK UNLOCK PRO v2.7"
 echo -e "==========================================${NC}"
 
-# 1. Instalación de Python y dependencias de sistema
-echo -e "\n${CYAN}[1/3] Instalando Python y dependencias...${NC}"
+# 1. Instalación de paquetes (Sin actualizar pip para evitar el error rojo)
+echo -e "\n${CYAN}[1/3] Instalando herramientas base...${NC}"
 pkg update -y
-pkg install python libusb clang binutils make -y
+pkg install python python-pip libusb clang binutils make -y
 
-# 2. Instalación de la librería correcta (mtkclient)
-echo -e "\n${CYAN}[2/3] Instalando librerías de desbloqueo...${NC}"
-pip install --upgrade pip
-pip install pyusb pyserial mtkclient  # <--- Aquí estaba el error, es mtkclient
+# 2. Instalación de mtkclient (La librería correcta)
+echo -e "\n${CYAN}[2/3] Instalando herramientas de desbloqueo...${NC}"
+# Usamos --break-system-packages porque Termux lo exige ahora para pip
+pip install pyusb pyserial mtkclient --break-system-packages
 
-# 3. Creación de la interfaz con los comandos de mtkclient
+# 3. Creación de la interfaz corregida
 echo -e "\n${CYAN}[3/3] Creando acceso directo 'MtkUnlock'...${NC}"
 
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
@@ -47,12 +47,12 @@ while true; do
     read -p " OPCIÓN: " opt
     case $opt in
         1)
-            echo -e "\nApaga el cel, presiona Vol+ y Vol- y conecta el USB..."
-            # Comando correcto para mtkclient
-            mtk oem unlock
+            echo -e "\nConecta el cel apagado con Vol+ y Vol-..."
+            # Comando oficial de mtkclient
+            python3 -m mtk oem unlock
             read -p "Presiona Enter para volver..." ;;
         2)
-            mtk oem lock
+            python3 -m mtk oem lock
             read -p "Presiona Enter para volver..." ;;
         3) exit 0 ;;
         *) echo -e "Opción no válida"; sleep 1 ;;
