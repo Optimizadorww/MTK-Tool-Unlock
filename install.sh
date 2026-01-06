@@ -1,22 +1,31 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Limpieza total de lo que no sirve
+# 1. Limpieza total (Borramos todo rastro de la 'kagada' anterior)
 rm -rf $HOME/mtkclient
 rm -f $PREFIX/bin/MtkUnlock
 
-# 1. Instalación de herramientas base (Lo que sí funciona en tus fotos)
+# 2. Instalación de bases (Lo que sí sirve en tus capturas)
+echo -e "\n[1/3] Instalando bases..."
 pkg update -y
 pkg install python git libusb clang binutils -y
 
-# 2. DESCARGA MANUAL (Bypass al error de "No matching distribution")
-echo -e "\nDescargando motor directamente de GitHub..."
+# 3. DESCARGA MANUAL FORZADA (Bypass total al error de tus fotos)
+echo -e "\n[2/3] Clonando motor desde GitHub..."
 cd $HOME
+# Usamos git para asegurar que la carpeta se cree sí o sí
 git clone --depth 1 https://github.com/bkerler/mtkclient.git
 
-# 3. Instalación de librerías con el flag obligatorio para Android
+# Verificamos si la carpeta realmente se creó
+if [ ! -d "$HOME/mtkclient" ]; then
+    echo -e "\nERROR CRÍTICO: No se pudo crear la carpeta mtkclient. Revisa tu internet."
+    exit 1
+fi
+
+# 4. Instalación de librerías USB (Con el flag para no-root)
+echo -e "\n[3/3] Configurando librerías..."
 pip install pyusb pyserial --break-system-packages
 
-# 4. Crear el comando con RUTA ABSOLUTA REAL
+# 5. Crear el comando con RUTA DE SISTEMA REAL
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
 clear
@@ -24,20 +33,5 @@ echo -e "=========================================="
 echo -e "      XIAOMI/MTK UNLOCKER 2026"
 echo -e "=========================================="
 
-# Forzamos la entrada a la carpeta física
-if [ -d "$HOME/mtkclient" ]; then
-    cd $HOME/mtkclient
-    # Ejecutamos llamando a python3 directamente sobre el archivo
-    python3 mtk oem unlock
-else
-    echo -e "ERROR: No se encontró la carpeta mtkclient."
-fi
-EOF
-
-chmod +x $PREFIX/bin/MtkUnlock
-
-clear
-echo -e "=========================================="
-echo -e "        ¡INSTALACIÓN COMPLETADA!"
-echo -e "   Escribe 'MtkUnlock' para iniciar"
-echo -e "=========================================="
+# Comando de ejecución directa
+cd $HOME
