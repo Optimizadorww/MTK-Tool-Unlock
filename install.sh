@@ -1,35 +1,41 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# Colores
+# Colores estilo Hacker
 VERDE='\033[1;32m'
 CYAN='\033[1;36m'
+ROJO='\033[1;31m'
 NC='\033[0m'
 
 clear
 echo -e "${VERDE}=========================================="
-echo -e "      MTK UNLOCK PRO v5.0 - SOLUCIÓN REAL"
+echo -e "      MTK UNLOCK PRO v6.0 - FIX TOTAL"
 echo -e "==========================================${NC}"
 
-# 1. Instalar solo paquetes básicos que Termux SI permite
-echo -e "\n${CYAN}[1/2] Instalando dependencias de sistema...${NC}"
+# 1. Limpieza absoluta de intentos fallidos
+echo -e "\n${CYAN}[1/3] Limpiando residuos anteriores...${NC}"
+rm -rf $HOME/mtkclient
+rm -f $PREFIX/bin/MtkUnlock
+
+# 2. Instalación de dependencias de sistema (Lo que SI funciona)
+echo -e "\n${CYAN}[2/3] Instalando dependencias básicas...${NC}"
 pkg update -y
-pkg install python libusb clang git binutils -y
+pkg install python libusb clang git binutils make -y
 
-# 2. Descargar mtkclient directamente (Sin usar PIP para la instalación)
-echo -e "\n${CYAN}[2/2] Clonando motor de desbloqueo desde GitHub...${NC}"
+# 3. Descarga Directa y Configuración Manual
+echo -e "\n${CYAN}[3/3] Descargando motor mtkclient desde origen...${NC}"
 cd $HOME
-rm -rf mtkclient # Borramos instalaciones viejas que fallaron
 git clone https://github.com/bkerler/mtkclient.git
+cd mtkclient
 
-# Instalar las únicas 2 librerías necesarias saltando el bloqueo de Termux
+# Instalamos las librerías necesarias ignorando las advertencias de Termux
 pip install pyusb pyserial --break-system-packages
 
-# 3. Crear el acceso directo indestructible
-echo -e "\n${CYAN}[+] Configurando comando 'MtkUnlock'...${NC}"
+# 4. Crear el comando ejecutable indestructible
+echo -e "\n${CYAN}[+] Configurando acceso directo...${NC}"
 
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
-# Interfaz de usuario
+# Interfaz de usuario mejorada
 VERDE='\033[1;32m'
 CYAN='\033[1;36m'
 NC='\033[0m'
@@ -37,23 +43,24 @@ NC='\033[0m'
 while true; do
     clear
     echo -e "${VERDE}=============================================================="
-    echo -e "            MTK BOOTLOADER UNLOCKER - MODO DIRECTO"
+    echo -e "            MTK BOOTLOADER UNLOCKER - MODO MANUAL"
     echo -e "==============================================================${NC}"
     echo -e " 1) DESBLOQUEAR BOOTLOADER (Unlock)"
     echo -e " 2) BLOQUEAR BOOTLOADER (Lock)"
     echo -e " 3) SALIR"
     echo ""
-    read -p " SELECCIONA: " opt
+    read -p " SELECCIONA UNA OPCIÓN: " opt
     case $opt in
         1)
-            echo -e "\n[!] Conecta el equipo apagado (Vol+ y Vol-)..."
-            # Ejecutamos el script descargado directamente
+            echo -e "\n[!] Conecta el equipo apagado manteniendo Vol+ y Vol-..."
+            # Ejecución directa apuntando al archivo del motor
             python3 $HOME/mtkclient/mtk oem unlock
-            read -p "Presiona Enter para volver..." ;;
+            echo -e "\nPresiona Enter para continuar..."; read ;;
         2)
             python3 $HOME/mtkclient/mtk oem lock
-            read -p "Presiona Enter para volver..." ;;
+            echo -e "\nPresiona Enter para continuar..."; read ;;
         3) exit 0 ;;
+        *) echo -e "Opción no válida"; sleep 1 ;;
     esac
 done
 EOF
@@ -61,6 +68,6 @@ EOF
 chmod +x $PREFIX/bin/MtkUnlock
 
 echo -e "\n${VERDE}=========================================="
-echo -e "        ¡INSTALACIÓN EXITOSA!"
-echo -e "   Escribe 'MtkUnlock' para empezar"
+echo -e "        ¡INSTALACIÓN COMPLETADA!"
+echo -e "   Escribe 'MtkUnlock' para iniciar"
 echo -e "==========================================${NC}"
