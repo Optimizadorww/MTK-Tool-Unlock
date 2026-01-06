@@ -1,43 +1,46 @@
 #!/data/data/com.termux/files/usr/bin/bash
 
-# 1. Limpieza total de los intentos que fallaron
+# 1. Limpieza total de carpetas mal nombradas
 rm -rf $HOME/mtkclient
+rm -rf $HOME/mtkclient-main
 rm -f $PREFIX/bin/MtkUnlock
 
-# 2. Instalación de bases (Lo único que no te da error)
+# 2. Instalación de paquetes base
 pkg update -y
-pkg install python libusb clang binutils wget unzip -y
+pkg install python git libusb clang binutils wget unzip -y
 
-# 3. DESCARGA FORZADA (Sin usar pip ni git que te fallan)
-echo -e "\nBajando archivos directamente..."
+# 3. Descarga Directa (Método que te funcionó en la foto 1000053751)
 cd $HOME
 wget https://github.com/bkerler/mtkclient/archive/refs/heads/main.zip
 unzip main.zip
+# CORRECCIÓN CLAVE: Renombramos la carpeta para que el comando la encuentre
 mv mtkclient-main mtkclient
 rm main.zip
 
-# 4. Instalación de librerías USB con el flag para No-Root
-# Esto es lo que pedía el error rojo en tu captura 1000053736
+# 4. Instalación de librerías USB (Ya las tienes, pero aseguramos)
 pip install pyusb pyserial --break-system-packages
 
-# 5. Configurar el comando con ruta física real
+# 5. Crear el comando con la RUTA CORRECTA
 cat << 'EOF' > $PREFIX/bin/MtkUnlock
 #!/data/data/com.termux/files/usr/bin/bash
 clear
 echo -e "=========================================="
-echo -e "      XIAOMI/MTK UNLOCKER 2026"
+echo -e "      MTK UNLOCKER - CORREGIDO"
 echo -e "=========================================="
 
-# Entramos a la carpeta y ejecutamos
-cd /data/data/com.termux/files/home/mtkclient
-python3 mtk oem unlock
+# Entramos a la carpeta ya renombrada
+if [ -d "$HOME/mtkclient" ]; then
+    cd $HOME/mtkclient
+    python3 mtk oem unlock
+else
+    echo -e "ERROR: No se encontró la carpeta mtkclient."
+fi
 EOF
 
 chmod +x $PREFIX/bin/MtkUnlock
 
 clear
 echo -e "=========================================="
-echo -e "        ¡INSTALACIÓN COMPLETADA!"
+echo -e "        ¡POR FIN INSTALADO!"
 echo -e "   Escribe 'MtkUnlock' para iniciar"
 echo -e "=========================================="
-
